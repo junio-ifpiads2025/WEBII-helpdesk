@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h2 class="fw-bold">
+                {% if user.is_staff %} Painel do Técnico {% else %} Meus Chamados {% endif %}
+            </h2>
+            <p class="text-muted">Olá, {{ user.first_name|default:user.username }}.</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'novo_ticket' %}" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-lg"></i> Novo Chamado
+            </a>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <a href="?" class="badge bg-secondary text-decoration-none">Todos</a>
+        <a href="?status=ABERTO" class="badge bg-danger text-decoration-none">Abertos</a>
+        <a href="?status=ANDAMENTO" class="badge bg-warning text-dark text-decoration-none">Em Andamento</a>
+        <a href="?status=FECHADO" class="badge bg-success text-decoration-none">Concluídos</a>
+    </div>
+
+    <div class="row">
+        {% for ticket in tickets %}
+        <div class="col-12 mb-2">
+            <div class="card border-start border-4 shadow-sm h-100 
+                {% if ticket.prioridade == 'ALTA' %}border-danger{% elif ticket.prioridade == 'MEDIA' %}border-warning{% else %}border-info{% endif %}">
+                
+                <div class="card-body d-flex align-items-center justify-content-between py-3">
+                    
+                    <div style="flex: 1;">
+                        <h5 class="mb-1 text-dark fw-bold">
+                            <a href="{% url 'detalhe_ticket' ticket.pk %}" class="text-decoration-none text-dark">
+                                {{ ticket.titulo }}
+                            </a>
+                        </h5>
+                        <small class="text-muted">
+                            #{{ ticket.id }} • Criado em {{ ticket.criado_em|date:"d/m H:i" }} 
+                            {% if user.is_staff %} • Por: <strong>{{ ticket.solicitante.username }}</strong>{% endif %}
+                        </small>
+                    </div>
+
+                    <div class="text-end ps-3">
+                        {% if ticket.prioridade == 'ALTA' %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger">Alta Prioridade</span>
+                        {% elif ticket.prioridade == 'MEDIA' %}
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning">Média</span>
+                        {% else %}
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info">Baixa</span>
+                        {% endif %}
+
+                        <div class="mt-1">
+                        {% if ticket.status == 'ABERTO' %}
+                            <span class="badge bg-danger">Aberto</span>
+                        {% elif ticket.status == 'ANDAMENTO' %}
+                            <span class="badge bg-warning text-dark">Em Andamento</span>
+                        {% else %}
+                            <span class="badge bg-success">Concluído</span>
+                        {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="ps-4">
+                        <a href="{% url 'detalhe_ticket' ticket.pk %}" class="btn btn-outline-secondary btn-sm">Ver/Editar</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5 bg-light rounded">
+            <h4 class="text-muted">Tudo limpo por aqui! 🎉</h4>
+            <p>Nenhum chamado encontrado.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
